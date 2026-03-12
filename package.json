@@ -1,0 +1,21 @@
+{
+  "name": "react-express-monorepo-skeleton",
+  "private": true,
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev": "npm run web:dev",
+    "web:dev": "concurrently -k -n server,client -c auto \"npm --workspace server run dev\" \"npm --workspace client run dev\"",
+    "build": "npm --workspace client run build",
+    "start": "npm --workspace server run start",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+
+    "docker:build": "docker build -t react-express-monorepo-skeleton:dev -f server/Dockerfile .",
+    "docker:push": "docker buildx build --provenance=true --sbom=true --platform linux/amd64 -t react-express-monorepo-skeleton:latest -f server/Dockerfile --push .",
+    "docker:publish": "npm run docker:push",
+    "docker:rm": "node -e \"const {execSync}=require('child_process'); const n='react-express-monorepo-skeleton'; try{execSync('docker rm -f '+n,{stdio:'ignore'});}catch(e){}\"",
+    "docker:run": "npm run docker:rm && npm run docker:build && docker run --name react-express-monorepo-skeleton --rm -p 8080:8080 --env-file server/docker.env react-express-monorepo-skeleton:dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
